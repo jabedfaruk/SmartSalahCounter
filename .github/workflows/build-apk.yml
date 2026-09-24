@@ -1,0 +1,46 @@
+name: Build APK
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Unpack project
+        run: |
+          tar xJf project.txz
+          cp -r SmartSalahCounter/. .
+          rm -rf SmartSalahCounter
+          ls -la
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Run counting tests and build the APK
+        run: |
+          gradle testDebugUnitTest assembleDebug --stacktrace
+          cp app/build/outputs/apk/debug/app-debug.apk SmartSalahCounter.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SmartSalahCounter-APK
+          path: SmartSalahCounter.apk
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Smart Salah Counter build ${{ github.run_number }}
+          files: SmartSalahCounter.apk
