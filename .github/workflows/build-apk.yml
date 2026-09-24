@@ -20,6 +20,10 @@ jobs:
           rm -rf SmartSalahCounter
           ls -la
 
+      - name: Apply fixes
+        run: |
+          sed -i 's/Theme.Material3.Light.DarkActionBar/Theme.Material3.Light/' app/src/main/res/values/themes.xml
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
